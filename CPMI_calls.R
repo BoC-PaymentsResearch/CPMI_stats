@@ -11,6 +11,7 @@ library(CPMIstats)
 
 # For this example assuming that payments_data is
 # a data frame of the correct format
+# ID, date, time, value, from, to
 
 # Liquidity --------------------------------------------------------------------
 
