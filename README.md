@@ -1,4 +1,4 @@
-# Liqudity Efficiency Measures and Drivers
+# Liquidity Efficiency Measures and Drivers
 
 To install the package run the following command in R.
 
