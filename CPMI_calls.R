@@ -11,6 +11,23 @@ library(CPMIstats)
 
 # For this example assuming that payments_data is
 # a data frame of the correct format
+# ID, date, time, value, from, to
+
+# Column Types:
+
+# ID   - string
+# date - string or R's date structure
+# time - string with format "HH:MM:SS" (eg. 14:32:11)
+# from - string
+# to   - string
+
+# All of the following should evaluate TRUE before calling the functions
+class(payments_data$ID) == "character"
+class(payments_data$date) == "character" || class(payments_data$date) == "Date"
+class(payments_data$time) == "character"
+class(payments_data$value) == "numeric"
+class(payments_data$from) == "character"
+class(payments_data$to) == "character"
 
 # Liquidity --------------------------------------------------------------------
 

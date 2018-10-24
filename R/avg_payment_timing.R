@@ -13,7 +13,7 @@
 avg_payment_timing <- function(payments) {
 
   avg_payment_time <- payments %>%
-    mutate(time_secs = as.numeric(time, unit = "secs")) %>%
+    mutate(time_secs = time_to_seconds_from_midnight(time)) %>%
     group_by(date, time) %>%
     summarise(
       sys_total_payments = sum(value),

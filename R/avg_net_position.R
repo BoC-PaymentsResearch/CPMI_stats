@@ -55,7 +55,7 @@ avg_net_position <- function(participant, payments, debit,
 
   # Converting payment times to the number of seconds from midnight
   net_payments <- net_payments %>%
-    mutate(time2 = as.numeric(time, unit = "secs"))
+    mutate(time2 = time_to_seconds_from_midnight(time))
 
 
   t0 <-
@@ -77,19 +77,21 @@ avg_net_position <- function(participant, payments, debit,
     )
 
   net_payments <- net_payments %>%
-     group_by(date) %>%
+    group_by(date) %>%
     mutate(
       dt = time2 - dplyr::lag(time2),
-      dt = ifelse(row_number() == 1, 1, dt),
+      dt = ifelse(row_number() == 1, first(time2) - t0, dt),
       Wt = (weighting(time2, T_final, t0)),
       dWt = (
         weighting(time2, T_final, t0) +
           weighting(dplyr::lag(time2), T_final, t0)
       ) / 2,
-      dWt = ifelse(row_number() == 1, (1 + Wt) / 2, dWt)
+      dWt = ifelse(row_number() == 1, (1 + Wt) / 2, dWt),
+      wn = dplyr::lag(net),
+      wn = ifelse(row_number() == 1, 0, wn)
     ) %>%
-    summarise(avg_net_pos = (1 / sum(Wt, na.rm = T)) *
-                sum(pmax(net, 0, na.rm = T) * dt * dWt, na.rm = T)) %>%
+    summarise(avg_net_pos = (2 / (T_final - t0)) *
+                sum(pmax(wn, 0, na.rm = T) * dt * dWt, na.rm = T)) %>%
     mutate(avg_net_pos = avg_net_pos / 1.0e+09)
 
   return(net_payments)

@@ -4,7 +4,8 @@
 \alias{agg_avg_net_position}
 \title{Aggregate Average Net Position}
 \usage{
-agg_avg_net_position(payments, debit, t_start = NULL, t_end = NULL)
+agg_avg_net_position(payments, debit, central_bank = NULL,
+  t_start = NULL, t_end = NULL)
 }
 \arguments{
 \item{payments}{dataframe value, payments data}
@@ -12,11 +13,18 @@ agg_avg_net_position(payments, debit, t_start = NULL, t_end = NULL)
 \item{debit}{logical value, if this value is TRUE then the net debit position
 is calculated. If FALSE then the net credit position is calculated.}
 
-\item{t_start}{time value, First time in the day when payments are sent.
+\item{central_bank}{character value, If the central bank is to be removed from
+calculation then this parameter should be the identifier
+of the central bank. Defaults to NULL meaning no participant
+is removed from the calculation}
+
+\item{t_start}{time value, First time in the day when payments are sent. Should
+have the format: HH:MM:SS.
 Defaults to NULL, taking the time of the first payment in the
 data as it's value.}
 
-\item{t_end}{time value, Last time in the day when payments are sent.
+\item{t_end}{time value, Last time in the day when payments are sent.Should
+have the format: HH:MM:SS.
 Defaults to NULL, taking the time of the last payment in the
 data as it's value.}
 }
