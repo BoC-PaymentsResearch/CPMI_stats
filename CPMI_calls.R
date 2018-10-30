@@ -1,9 +1,28 @@
-library(dplyr)
-library(tidyr)
-library(readr)
-library(purrr)
-library(lubridate)
 
+install.packages("devtools")
+
+library(devtools)
+
+#------------------------------------------------------------------------------
+
+# If this is the first time running this script then run the following command
+
+install_github("BoC-PaymentsResearch/CPMI_stats")
+
+# This function call will install the CPMI_stats package from the github
+# repository, and also all of the packages dependencies. This will take
+# a few minutes to run
+
+#------------------------------------------------------------------------------
+
+# If you have previously used the install_github function then you should run
+# the following command before calling any of the functions in the package
+
+install_github("BoC-PaymentsResearch/CPMI_stats", dependencies = FALSE)
+
+# This will ensure that you have the latest version of the package installed.
+# Since you will have previouysly run the first install_github command you
+# don't need to install the dependencies again so this call will save time.
 
 library(CPMIstats)
 
