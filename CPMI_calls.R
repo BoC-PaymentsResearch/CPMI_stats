@@ -21,7 +21,7 @@ install_github("BoC-PaymentsResearch/CPMI_stats")
 install_github("BoC-PaymentsResearch/CPMI_stats", dependencies = FALSE)
 
 # This will ensure that you have the latest version of the package installed.
-# Since you will have previouysly run the first install_github command you
+# Since you will have previously run the first install_github command you
 # don't need to install the dependencies again so this call will save time.
 
 library(CPMIstats)
