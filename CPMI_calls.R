@@ -24,6 +24,10 @@ install_github("BoC-PaymentsResearch/CPMI_stats", dependencies = FALSE)
 # Since you will have previously run the first install_github command you
 # don't need to install the dependencies again so this call will save time.
 
+library(dplyr)
+library(purrr)
+library(tidyr)
+
 library(CPMIstats)
 
 # Example script for calling the functions
@@ -46,55 +50,61 @@ class(payments_data$value)== "numeric"
 class(payments_data$from) == "character"
 class(payments_data$to)   == "character"
 
+
+
+# The package contains synthetic data for one day in the correct format. This
+# data is called example_payments, all of the following functions are called
+# with this data.
+
 # Liquidity --------------------------------------------------------------------
 
 # Participant Level ----------
 
 # daily maximum net debit position of participant i
-max_debit <- max_liq_prov(i, payments_data, T)
+max_debit <- max_liq_prov("BBBBBB", example_payments, T)
 
 
 # average net debit position of participant i
-avg_debit <- avg_net_position(i, payments_data, T)
+avg_debit <- avg_net_position("BBBBBB", example_payments, T)
 
 
 # daily maximum net credit position of participant i
-max_credit <- max_liq_prov(i, payments_data, F)
+max_credit <- max_liq_prov("BBBBBB", example_payments, F)
 
 
 # average net credit position of participant i
-avg_credit <- avg_net_position(i, payments_data, F)
+avg_credit <- avg_net_position("BBBBBB", example_payments, F)
 
 # liquidity provision relative to usage
-liq_prov <- liq_prov_rel_usage(i, payments_data)
+liq_prov <- liq_prov_rel_usage("BBBBBB", example_payments)
 
 # System Level ----------
 
 # average net debit position
-agg_net_debit <- agg_avg_net_position(payments_data, T)
+agg_net_debit <- agg_avg_net_position(example_payments, T)
 
 # average net credit position
-agg_net_credit <- agg_avg_net_position(payments_data, F)
+agg_net_credit <- agg_avg_net_position(example_payments, F)
 
 # liquidity efficiency
-sys_liq_eff <- sys_wide_liq_eff(payments_data)
+sys_liq_eff <- sys_wide_liq_eff(example_payments)
 
 # liquidity provision relative to usage
-agg_liq_prov <- agg_liq_prov_rel_usage(payments_data)
+agg_liq_prov <- agg_liq_prov_rel_usage(example_payments)
 
 #------------------------------------------------------------------------------
 
 # Timing ----------------------------------------------------------------------
 
 # average payment timing
-avg_time <- avg_payment_timing(payments_data)
+avg_time <- avg_payment_timing(example_payments)
 
 # deciles
-deciles <- decile(payments_data)
+deciles <- decile(example_payments)
 
 #------------------------------------------------------------------------------
 
 # Distributional Considerations
 
 # Gini coefficient
-gini <- gini_coefficient(payments_data)
+gini <- gini_coefficient(example_payments)
