@@ -24,10 +24,6 @@ install_github("BoC-PaymentsResearch/CPMI_stats", dependencies = FALSE)
 # Since you will have previously run the first install_github command you
 # don't need to install the dependencies again so this call will save time.
 
-library(dplyr)
-library(purrr)
-library(tidyr)
-
 library(CPMIstats)
 
 # Example script for calling the functions
