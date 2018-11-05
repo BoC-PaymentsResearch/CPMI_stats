@@ -24,39 +24,41 @@
 avg_net_position <- function(participant, payments, debit,
                              t_start = NULL, t_end = NULL) {
 
-  payments_out <- payments %>%
-    filter(from == participant) %>%
-    group_by(date, time) %>%
-    summarise(payments_out = sum(value))
-
-  payments_in <- payments %>%
-    filter(to == participant) %>%
-    group_by(date, time) %>%
-    summarise(payments_in = sum(value))
-
-  net_payments <- full_join(payments_out, payments_in,
-                            by = c("date", "time")) %>%
-    arrange(date, time)
-
-  net_payments[is.na(net_payments)] <- 0
-
-  if (debit) {
-    net_payments <-
-      net_payments %>% mutate(net = payments_out - payments_in)
-
-  } else {
-    net_payments <-
-      net_payments %>% mutate(net = payments_in - payments_out)
+  if(!"data.table" %in% class(payments)) {
+    setDT(payments)
   }
 
-  net_payments <- net_payments %>%
-    mutate(net = cumsum(net))
+  payments_out <-
+    payments[from == participant,
+             .(payments_out = sum(value)),
+             keyby = .(date, time)]
 
+  payments_in <-
+    payments[to == participant,
+             .(payments_in = sum(value)),
+             keyby = .(date, time)]
+
+  setkey(payments_out, date, time)
+  setkey(payments_in, date, time)
+
+  net_payments <- merge(payments_out, payments_in, all = TRUE)
+
+  # an NA value at t means no payment was sent at t
+  net_payments[is.na(net_payments)] <- 0
+
+
+  if(debit) {
+    net_payments[, net := payments_out - payments_in]
+  }
+  else {
+    net_payments[, net := payments_in - payments_out]
+  }
+
+  net_payments <-
+    net_payments[, .(time = time, net =  cumsum(net)), by = .(date)]
 
   # Converting payment times to the number of seconds from midnight
-  net_payments <- net_payments %>%
-    mutate(time2 = time_to_seconds_from_midnight(time))
-
+  net_payments[, time2 := time_to_seconds_from_midnight(time)]
 
   t0 <-
     ifelse(
@@ -76,23 +78,21 @@ avg_net_position <- function(participant, payments, debit,
       max(net_payments$time2)
     )
 
-  net_payments <- net_payments %>%
-    group_by(date) %>%
-    mutate(
-      dt = time2 - dplyr::lag(time2),
-      dt = ifelse(row_number() == 1, first(time2) - t0, dt),
-      Wt = (weighting(time2, T_final, t0)),
-      dWt = (
-        weighting(time2, T_final, t0) +
-          weighting(dplyr::lag(time2), T_final, t0)
-      ) / 2,
-      dWt = ifelse(row_number() == 1, (1 + Wt) / 2, dWt),
-      wn = dplyr::lag(net),
-      wn = ifelse(row_number() == 1, 0, wn)
-    ) %>%
-    summarise(avg_net_pos = (2 / (T_final - t0)) *
-                sum(pmax(wn, 0, na.rm = T) * dt * dWt, na.rm = T)) %>%
-    mutate(avg_net_pos = avg_net_pos / 1.0e+09)
+  net_payments[, dt := time2 - shift(time2), by = .(date)
+               ][, dt := ifelse(.I == 1, data.table::first(time2) - t0, dt), by = .(date)
+                 ][, Wt := (weighting(time2, T_final, t0)), by = .(date)
+                   ][, dWt := (weighting(time2, T_final, t0) +
+                       weighting(shift(time2), T_final, t0)) / 2, by = .(date)
+                     ][, dWt := ifelse(.I == 1, (1 + Wt) / 2, dWt), by = .(date)
+                       ][, wn := shift(net), by = .(date)
+                         ][, wn := ifelse(.I == 1, 0, wn), by = .(date)]
+
+  net_payments <-
+    net_payments[, .(avg_net_pos = (2 / (T_final - t0)) *
+                       sum(pmax(wn, 0, na.rm = T) * dt * dWt, na.rm = T)),
+                 by = .(date)]
+
+  net_payments[, avg_net_pos := avg_net_pos / 1.0e+09]
 
   return(net_payments)
 }

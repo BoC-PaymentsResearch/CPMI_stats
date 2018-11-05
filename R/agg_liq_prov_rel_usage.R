@@ -25,10 +25,8 @@ agg_liq_prov_rel_usage <- function(payments) {
   agg_prov <-
     do.call("rbind", agg_prov)
 
-  total_liquidity_provided <- agg_prov %>%
-    filter(liq_prov > 0) %>%
-    group_by(date) %>%
-    summarise(total = sum(liq_prov, na.rm = T))
+  total_liquidity_provided <-
+    agg_prov[liq_prov > 0, .(total = sum(liq_prov, na.rm = T)), keyby = .(date)]
 
   return(total_liquidity_provided)
 }

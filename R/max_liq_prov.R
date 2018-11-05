@@ -15,39 +15,45 @@
 #'
 max_liq_prov <- function(participant, payments, debit) {
 
+  if(!"data.table" %in% class(payments)) {
+    setDT(payments)
+  }
 
-  payments_out <- payments %>%
-    filter(from == participant) %>%
-    group_by(date, time) %>%
-    summarise(payments_out = sum(value))
+  payments_out <-
+    payments[from == participant,
+              .(payments_out = sum(value)),
+              keyby = .(date, time)]
 
-  payments_in <- payments %>%
-    filter(to == participant) %>%
-    group_by(date, time) %>%
-    summarise(payments_in = sum(value))
+  payments_in <-
+    payments[to == participant,
+              .(payments_in = sum(value)),
+              keyby = .(date, time)]
 
-  net_payments <- full_join(payments_out, payments_in,
-                            by = c("date", "time")) %>%
-    arrange(date, time)
+  setkey(payments_out, date, time)
+  setkey(payments_in, date, time)
+
+  net_payments <- merge(payments_out, payments_in, all = TRUE)
 
   # an NA value at t means no payment was sent at t
   net_payments[is.na(net_payments)] <- 0
 
-  if (debit) {
-    net_payments <-
-      net_payments %>% mutate(net = payments_out - payments_in)
 
-  } else {
-    net_payments <-
-      net_payments %>% mutate(net = payments_in - payments_out)
+  if(debit) {
+    net_payments[, net := payments_out - payments_in]
+  }
+  else {
+    net_payments[, net := payments_in - payments_out]
   }
 
-  net_payments <- net_payments %>%
-    mutate(net = cumsum(net)) %>%
-    group_by(date) %>%
-    summarise(max_net_pos = max(net, 0) / 1.0e+09) %>%
-    mutate(participant = participant) %>%
-    select(date, participant, max_net_pos)
+  net_payments <-
+    net_payments[, .(net =  cumsum(net)), by = .(date)]
+
+  net_payments <-
+    net_payments[, .(max_net_pos = max(net, 0) / 1.0e+09), by = .(date)]
+
+  net_payments[, participant := participant]
+
+  setcolorder(net_payments, c("date", "participant", "max_net_pos"))
 
   return(net_payments)
 }

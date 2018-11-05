@@ -12,6 +12,10 @@
 sys_wide_liq_eff <- function(payments) {
 
 
+  if(!"data.table" %in% class(payments)) {
+    setDT(payments)
+  }
+
   participants <- unique(payments$from)
 
   # Participant Level Liquidity Provided --------------------------------------
@@ -23,25 +27,26 @@ sys_wide_liq_eff <- function(payments) {
   total_liquidity_provided <-
     do.call("rbind", total_liquidity_provided)
 
-  total_liquidity_provided <- total_liquidity_provided %>%
-    group_by(date) %>%
-    summarise(total = sum(max_net_pos))
-  #----------------------------------------------------------------------------
+  total_liquidity_provided <-
+    total_liquidity_provided[, .(total = sum(max_net_pos)), by = .(date)]
 
+  #----------------------------------------------------------------------------
 
   # Aggregate Level Payments Made ---------------------------------------------
-  total_payments_made <- payments %>%
-    group_by(date, from) %>%
-    summarise(total = sum(value)) %>%
-    group_by(date) %>%
-    summarise(total = sum(total) / 1.0e+09)
 
-  system_wide_liquidity <-
-    total_payments_made %>%
-    mutate(efficiency = total / total_liquidity_provided$total) %>%
-    select(-total)
+  total_payments_made <-
+    payments[, .(total = sum(value)), by = .(date, from)]
+
+  total_payments_made <-
+    total_payments_made[, .(total = sum(total) / 1.0e+09), by = .(date)]
+
+
+  total_payments_made[, efficiency := total / total_liquidity_provided$total]
+
+  total_payments_made[, total := NULL]
+
   #----------------------------------------------------------------------------
 
-  return(system_wide_liquidity)
+  return(total_payments_made)
 
 }

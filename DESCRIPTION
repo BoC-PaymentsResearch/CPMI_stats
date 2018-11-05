@@ -1,7 +1,7 @@
 Package: CPMIstats
 Type: Package
 Title: CPMI Proposed Liqudity Efficieny Measures 
-Version: 0.1.1
+Version: 0.1.2
 Author: Derek Brito
 Maintainer: Derek Brito <dbrito@bank-banque-canada.ca>
 Description: Calculates a set of proposed liquidity measures by the CPMI
@@ -10,10 +10,7 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports:
-    dplyr,
-    tidyr,
-    purrr,
-    readr,
-    lubridate,
     roxygen2
+Depends:
+    data.table
 RoxygenNote: 6.1.0

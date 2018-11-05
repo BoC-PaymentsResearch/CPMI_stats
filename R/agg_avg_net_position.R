@@ -29,7 +29,7 @@
 #' the avg_net_position function.
 #'
 agg_avg_net_position <- function(payments, debit, central_bank = NULL,
-                             t_start = NULL, t_end = NULL) {
+                                 t_start = NULL, t_end = NULL) {
 
   participants <- unique(payments$from)
 
@@ -44,9 +44,10 @@ agg_avg_net_position <- function(payments, debit, central_bank = NULL,
   net_position_by_participant <-
     do.call("rbind", net_position_by_participant)
 
-  net_position_by_participant <- net_position_by_participant %>%
-    group_by(date) %>%
-    summarise(aggregate_net = sum(avg_net_pos))
+
+  net_position_by_participant <-
+    net_position_by_participant[, .(aggregate_net = sum(avg_net_pos)),
+                                by = list(date)]
 
   return(net_position_by_participant)
 }

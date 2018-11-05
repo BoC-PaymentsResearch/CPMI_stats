@@ -13,6 +13,10 @@
 liq_prov_rel_usage <- function(participant, payments) {
 
 
+  if(!"data.table" %in% class(payments)) {
+    setDT(payments)
+  }
+
   participants <- unique(payments$from)
 
 
@@ -21,10 +25,8 @@ liq_prov_rel_usage <- function(participant, payments) {
     max_liq_prov(participant, payments, T)
 
   participant_payments_sent <-
-    payments %>%
-    filter(from == participant) %>%
-    group_by(date) %>%
-    summarise(par_total_payments = sum(value))
+    payments[from == participant, .(par_total_payments = sum(value, na.rm = T)), by = .(date)]
+
   #----------------------------------------------------------------------------
 
   # Aggregate Level Liquidity Provided and Payments Sent ----------------------
@@ -37,24 +39,36 @@ liq_prov_rel_usage <- function(participant, payments) {
   total_liquidity_provided <-
     do.call("rbind", total_liquidity_provided)
 
-  total_liquidity_provided <- total_liquidity_provided %>%
-    group_by(date) %>%
-    summarise(sys_total_liquidity = sum(max_net_pos))
+  total_liquidity_provided <-
+    total_liquidity_provided[, .(sys_total_liquidity = sum(max_net_pos)),
+                             keyby = .(date)]
 
-  total_payments_sent <- payments %>%
-    group_by(date, from) %>%
-    summarise(total = sum(value)) %>%
-    group_by(date) %>%
-    summarise(sys_total_payments = sum(total))
+  total_payments_sent <- payments[, .(sys_total_payments = sum(value)),
+                                  keyby = .(date)]
+
   #----------------------------------------------------------------------------
 
-  liq_prov_rel_usage <- participant_liq_provided %>%
-    left_join(total_liquidity_provided, by = "date") %>%
-    left_join(participant_payments_sent, by = "date") %>%
-    left_join(total_payments_sent, by = "date") %>%
-    transmute(date = date, liq_prov = (max_net_pos / sys_total_liquidity) -
-             (par_total_payments / sys_total_payments))
+  setkey(participant_liq_provided, date)
+  setkey(total_liquidity_provided, date)
+  setkey(participant_payments_sent, date)
+  setkey(total_payments_sent, date)
 
+  liq_prov_rel_usage <-
+    merge(participant_liq_provided, total_liquidity_provided, all.x = TRUE)
+
+  liq_prov_rel_usage <-
+    merge(liq_prov_rel_usage, participant_payments_sent, all.x = TRUE)
+
+  liq_prov_rel_usage <-
+    merge(liq_prov_rel_usage, total_payments_sent, all.x = TRUE)
+
+  liq_prov_rel_usage[is.na(liq_prov_rel_usage)] <- 0
+
+  liq_prov_rel_usage[, liq_prov := (max_net_pos / sys_total_liquidity) -
+                       (par_total_payments / sys_total_payments)]
+
+  liq_prov_rel_usage[, c("participant", "max_net_pos", "sys_total_liquidity",
+                         "par_total_payments", "sys_total_payments") := NULL]
 
   return(liq_prov_rel_usage)
 
