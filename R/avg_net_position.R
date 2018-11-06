@@ -78,6 +78,13 @@ avg_net_position <- function(participant, payments, debit,
       max(net_payments$time2)
     )
 
+  if(t0 == T_final) {
+    warning("The final time and the initial time are the same, if you passed values
+            to t_start and t_end check if they follow the correct format (HH:MM:SS).
+            If you didn't pass anything to t_start and t_end check if the format of the
+            time column in your data is as outlined in CPMI_calls.R")
+  }
+
   net_payments[, dt := time2 - shift(time2), by = .(date)
                ][, dt := ifelse(.I == 1, data.table::first(time2) - t0, dt), by = .(date)
                  ][, Wt := (weighting(time2, T_final, t0)), by = .(date)
