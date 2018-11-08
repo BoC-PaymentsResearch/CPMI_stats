@@ -86,7 +86,7 @@ avg_net_position <- function(participant, payments, debit,
   }
 
   net_payments[, dt := time2 - shift(time2), by = .(date)
-               ][, dt := ifelse(.I == 1, data.table::first(time2) - t0, dt), by = .(date)
+               ][, dt := ifelse(.I == 1, first(time2) - t0, dt), by = .(date)
                  ][, Wt := (weighting(time2, T_final, t0)), by = .(date)
                    ][, dWt := (weighting(time2, T_final, t0) +
                        weighting(shift(time2), T_final, t0)) / 2, by = .(date)
