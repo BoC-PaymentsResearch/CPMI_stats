@@ -4,13 +4,22 @@
 \alias{liq_prov_rel_usage}
 \title{Liquidity Provision Relative to Usage}
 \usage{
-liq_prov_rel_usage(participant, payments)
+liq_prov_rel_usage(participant, payments,
+  total_liquidity_provided = NULL, total_payments_sent = NULL)
 }
 \arguments{
 \item{participant}{character value, Identifying code of the payments system
 participant}
 
 \item{payments}{dataframe value, payments data}
+
+\item{total_liquidity_provided}{dataframe value, daily system wide liquidity provided
+defaults to NULL, the aggregate version of this
+function calls the function with non NULL value}
+
+\item{total_payments_sent}{dataframe value, daily payments sent
+defaults to NULL, the aggregate version of this function
+calls the function with non NULL value}
 }
 \value{
 dataframe structure, liquidity provision of the given participant
