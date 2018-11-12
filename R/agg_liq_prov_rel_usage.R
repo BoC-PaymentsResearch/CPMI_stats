@@ -17,10 +17,28 @@ agg_liq_prov_rel_usage <- function(payments) {
 
   participants <- unique(payments$from)
 
-  agg_prov <-
-    lapply(participants,
+  total_liquidity_provided <-
+    mclapply(participants,
            function(x)
-             liq_prov_rel_usage(x, payments))
+             max_liq_prov(x, payments, debit = T))
+
+  total_liquidity_provided <-
+    do.call("rbind", total_liquidity_provided)
+
+  total_liquidity_provided <-
+    total_liquidity_provided[, .(sys_total_liquidity = sum(max_net_pos)),
+                             keyby = .(date)]
+
+  total_payments_sent <- payments[, .(sys_total_payments = sum(value)),
+                                  keyby = .(date)]
+
+
+  agg_prov <-
+    mclapply(participants,
+           function(x)
+             liq_prov_rel_usage(x, payments,
+                                total_liquidity_provided = total_liquidity_provided,
+                                total_payments_sent = total_payments_sent))
 
   agg_prov <-
     do.call("rbind", agg_prov)

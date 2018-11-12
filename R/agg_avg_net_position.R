@@ -38,7 +38,7 @@ agg_avg_net_position <- function(payments, debit, central_bank = NULL,
   }
 
   net_position_by_participant <-
-    (lapply(participants, function(x) avg_net_position(x, payments, debit,
+    (mclapply(participants, function(x) avg_net_position(x, payments, debit,
                                                        t_start, t_end)))
 
   net_position_by_participant <-

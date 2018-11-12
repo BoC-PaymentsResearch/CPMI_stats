@@ -3,6 +3,13 @@
 #' @param participant character value, Identifying code of the payments system
 #'                    participant
 #' @param payments dataframe value, payments data
+#' @param total_liquidity_provided dataframe value, daily system wide liquidity provided
+#'                           defaults to NULL, the aggregate version of this
+#'                           function calls the function with non NULL value
+#' @param total_payments_sent dataframe value, daily payments sent
+#'                            defaults to NULL, the aggregate version of this function
+#'                            calls the function with non NULL value
+#'
 #' @return dataframe structure, liquidity provision of the given participant
 #'
 #' @details
@@ -10,7 +17,9 @@
 #' Assumes that the payments data file has the form:
 #' ID, date, time, value, from, to
 #'
-liq_prov_rel_usage <- function(participant, payments) {
+liq_prov_rel_usage <- function(participant, payments,
+                               total_liquidity_provided = NULL,
+                               total_payments_sent = NULL) {
 
 
   if(!"data.table" %in% class(payments)) {
@@ -25,11 +34,15 @@ liq_prov_rel_usage <- function(participant, payments) {
     max_liq_prov(participant, payments, T)
 
   participant_payments_sent <-
-    payments[from == participant, .(par_total_payments = sum(value, na.rm = T)), by = .(date)]
+    payments[from == participant,
+             .(par_total_payments = sum(value, na.rm = T)), by = .(date)]
 
   #----------------------------------------------------------------------------
 
   # Aggregate Level Liquidity Provided and Payments Sent ----------------------
+
+
+  if(is.null(total_liquidity_provided) && is.null(total_payments_sent)) {
 
   total_liquidity_provided <-
     lapply(participants,
@@ -45,6 +58,8 @@ liq_prov_rel_usage <- function(participant, payments) {
 
   total_payments_sent <- payments[, .(sys_total_payments = sum(value)),
                                   keyby = .(date)]
+  }
+
 
   #----------------------------------------------------------------------------
 

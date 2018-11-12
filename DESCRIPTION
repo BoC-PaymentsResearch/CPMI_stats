@@ -13,4 +13,5 @@ Imports:
     roxygen2
 Depends:
     data.table
+    parallel
 RoxygenNote: 6.1.0
