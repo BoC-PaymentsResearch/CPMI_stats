@@ -1,7 +1,7 @@
 Package: CPMIstats
 Type: Package
 Title: CPMI Proposed Liqudity Efficiency Measures 
-Version: 0.1.2
+Version: 0.1.3
 Author: Derek Brito
 Maintainer: Derek Brito <dbrito@bank-banque-canada.ca>
 Description: Calculates a set of proposed liquidity measures by the CPMI
