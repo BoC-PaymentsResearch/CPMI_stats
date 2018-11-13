@@ -25,7 +25,7 @@ gini_coefficient <- function(payments) {
 
   # Average liquidity provided
   liquidity_provided <-
-    lapply(participants, function(x)
+    mclapply(participants, function(x)
       max_liq_prov(x, payments, T))
 
   liquidity_provided <-

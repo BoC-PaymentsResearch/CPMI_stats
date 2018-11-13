@@ -20,7 +20,7 @@ sys_wide_liq_eff <- function(payments) {
 
   # Participant Level Liquidity Provided --------------------------------------
   total_liquidity_provided <-
-    lapply(participants,
+    mclapply(participants,
            function(x)
              max_liq_prov(x, payments, debit = T))
 

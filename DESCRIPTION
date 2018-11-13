@@ -1,6 +1,6 @@
 Package: CPMIstats
 Type: Package
-Title: CPMI Proposed Liqudity Efficieny Measures 
+Title: CPMI Proposed Liqudity Efficiency Measures 
 Version: 0.1.2
 Author: Derek Brito
 Maintainer: Derek Brito <dbrito@bank-banque-canada.ca>
@@ -12,6 +12,7 @@ LazyData: true
 Imports:
     roxygen2
 Depends:
-    data.table
-    parallel
+    data.table,
+    parallel,
+    hms
 RoxygenNote: 6.1.0
