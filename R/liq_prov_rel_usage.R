@@ -45,7 +45,7 @@ liq_prov_rel_usage <- function(participant, payments,
   if(is.null(total_liquidity_provided) && is.null(total_payments_sent)) {
 
   total_liquidity_provided <-
-    lapply(participants,
+    mclapply(participants,
            function(x)
              max_liq_prov(x, payments, debit = T))
 

@@ -32,16 +32,20 @@ library(CPMIstats)
 # a data frame of the correct format
 # ID, date, time, value, from, to
 
+## Update in version 0.1.3 the functions require the time column to be of class
+#  hms, so before calling any of the functions run the command
+payments_data$time <- as.hms(payments_data$time)
+
 # ID   - string
 # date - string or R's date structure
-# time - string with format "HH:MM:SS" (eg. 14:32:11)
+# time - hms object form "HH:MM:SS" (eg. 14:32:11)
 # from - string
 # to   - string
 
-# All of the following should evalutate TRUE before calling the functions
+# All of the following should evaluate TRUE before calling the functions
 class(payments_data$ID)   == "character"
 class(payments_data$date) == "character" || class(payments_data$date) == "Date"
-class(payments_data$time) == "character"
+class(payments_data$time) == "hms" || class(payments_data$time) == "difftime"
 class(payments_data$value)== "numeric"
 class(payments_data$from) == "character"
 class(payments_data$to)   == "character"
