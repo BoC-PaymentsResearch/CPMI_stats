@@ -3,7 +3,7 @@
 To install the package run the following command in R.
 
 ```
-install.packages("CPMIstats_0.1.2.tar.gz", repos = NULL)
+install.packages("CPMIstats_0.1.3.tar.gz", repos = NULL)
 ```
 
 Alternatively, the package can be installed by using the `install_github` function from the R package `devtools`. The steps for this installation are given in the `CPMI_calls.R` file. This method may make it easier to keep the most up to date version.
