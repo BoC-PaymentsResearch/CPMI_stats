@@ -10,3 +10,6 @@ Alternatively, the package can be installed by using the `install_github` functi
 
 `CPMI_calls.R` is an example file with a list of all the functions in the package. For more information on the functions
 type `?function_name`.
+
+
+**Update:** version 0.1.3 requires the time column of the payments data to be converted to a hms class, the command to do this is given in `CPMI_calls.R`.
