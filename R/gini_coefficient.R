@@ -10,6 +10,20 @@
 #'
 gini_coefficient <- function(payments) {
 
+
+  # correct column name check
+  if(!all(colnames(payments) %in% c("ID", "date", "time", "value", "from", "to"))) {
+    stop("The column names are incorrect. Please ensure the columns are named:
+         ID, date, time, value, from, to")
+  }
+
+  # correct time formatting
+  if(!"hms" %in% class(payments$time)) {
+    stop("The payments column isn't in the correct format. It needs to be of class
+         hms, use the function as.hms() to convert it")
+  }
+
+
   if(!"data.table" %in% class(payments)) {
     setDT(payments)
   }
@@ -29,7 +43,7 @@ gini_coefficient <- function(payments) {
       max_liq_prov(x, payments, T))
 
   liquidity_provided <-
-    do.call("rbind", liquidity_provided)
+    rbindlist(liquidity_provided)
 
   setnames(liquidity_provided, "participant", "from")
 
