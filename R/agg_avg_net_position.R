@@ -31,6 +31,20 @@
 agg_avg_net_position <- function(payments, debit, central_bank = NULL,
                                  t_start = NULL, t_end = NULL) {
 
+
+  # correct column name check
+  if(!all(colnames(payments) %in% c("ID", "date", "time", "value", "from", "to"))) {
+    stop("The column names are incorrect. Please ensure the columns are named:
+         ID, date, time, value, from, to")
+  }
+
+  # correct time formatting
+  if(!"hms" %in% class(payments$time)) {
+    stop("The payments column isn't in the correct format. It needs to be of class
+         hms, use the function as.hms() to convert it")
+  }
+
+
   participants <- unique(payments$from)
 
   if(!is.null(central_bank)) {
@@ -42,7 +56,7 @@ agg_avg_net_position <- function(payments, debit, central_bank = NULL,
                                                        t_start, t_end)))
 
   net_position_by_participant <-
-    do.call("rbind", net_position_by_participant)
+    rbindlist(net_position_by_participant)
 
 
   net_position_by_participant <-

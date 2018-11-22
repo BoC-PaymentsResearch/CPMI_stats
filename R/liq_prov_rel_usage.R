@@ -22,6 +22,19 @@ liq_prov_rel_usage <- function(participant, payments,
                                total_payments_sent = NULL) {
 
 
+  # correct column name check
+  if(!all(colnames(payments) %in% c("ID", "date", "time", "value", "from", "to"))) {
+    stop("The column names are incorrect. Please ensure the columns are named:
+         ID, date, time, value, from, to")
+  }
+
+  # correct time formatting
+  if(!"hms" %in% class(payments$time)) {
+    stop("The payments column isn't in the correct format. It needs to be of class
+         hms, use the function as.hms() to convert it")
+  }
+
+
   if(!"data.table" %in% class(payments)) {
     setDT(payments)
   }
@@ -50,7 +63,7 @@ liq_prov_rel_usage <- function(participant, payments,
              max_liq_prov(x, payments, debit = T))
 
   total_liquidity_provided <-
-    do.call("rbind", total_liquidity_provided)
+    rbindlist(total_liquidity_provided)
 
   total_liquidity_provided <-
     total_liquidity_provided[, .(sys_total_liquidity = sum(max_net_pos)),
