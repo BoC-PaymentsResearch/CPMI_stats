@@ -8,14 +8,6 @@ liq_prov_rel_usage(payments)
 }
 \arguments{
 \item{payments}{dataframe value, payments data}
-
-\item{total_liquidity_provided}{dataframe value, daily system wide liquidity provided
-defaults to NULL, the aggregate version of this
-function calls the function with non NULL value}
-
-\item{total_payments_sent}{dataframe value, daily payments sent
-defaults to NULL, the aggregate version of this function
-calls the function with non NULL value}
 }
 \value{
 function, returns a closure that contains the aggregate level data
@@ -30,11 +22,8 @@ ID, date, time, value, from, to
 }
 \examples{
 
-
 participant_liq_prov <- liq_prov_rel_usage(example_data2)
 
 # participant_liq_prov can now be called with a participants name
 AAAAAA_liq_prov <- participant_liq_prov("AAAAAA")
-
-
 }

@@ -12,13 +12,10 @@
 #'
 #' @examples
 #'
-#'
 #' participant_liq_prov <- liq_prov_rel_usage(example_data2)
 #'
 #' # participant_liq_prov can now be called with a participants name
 #' AAAAAA_liq_prov <- participant_liq_prov("AAAAAA")
-#'
-#'
 liq_prov_rel_usage <- function(payments) {
 
   # correct column name check
