@@ -76,7 +76,16 @@ max_credit <- max_liq_prov("BBBBBB", example_payments, F)
 avg_credit <- avg_net_position("BBBBBB", example_payments, F)
 
 # liquidity provision relative to usage
-liq_prov <- liq_prov_rel_usage("BBBBBB", example_payments)
+
+# To improve performance liq_prov_rel_usage returns a closure. Before calculating
+# the measure for a specific participant all of the aggregate level data is calculated
+# which is stored in the environment of the closure returned by liq_prov_rel_usage.
+
+# The closure then takes one argument: name of a participant
+
+liq_prov_participant <- liq_prov_rel_usage(example_payments)
+
+liq_prov <- liq_prov_participant("BBBBBB")
 
 # System Level ----------
 

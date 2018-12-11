@@ -28,30 +28,12 @@ agg_liq_prov_rel_usage <- function(payments) {
          hms, use the function as.hms() to convert it")
   }
 
-
   participants <- unique(payments$from)
 
-  total_liquidity_provided <-
-    mclapply(participants,
-           function(x)
-             max_liq_prov(x, payments, debit = T))
-
-  total_liquidity_provided <-
-    rbindlist(total_liquidity_provided)
-
-  total_liquidity_provided <-
-    total_liquidity_provided[, .(sys_total_liquidity = sum(max_net_pos)),
-                             keyby = .(date)]
-
-  total_payments_sent <- payments[, .(sys_total_payments = sum(value)),
-                                  keyby = .(date)]
+  participant_liq_prov <- liq_prov_rel_usage(payments)
 
   agg_prov <-
-    mclapply(participants,
-           function(x)
-             liq_prov_rel_usage(x, payments,
-                                total_liquidity_provided = total_liquidity_provided,
-                                total_payments_sent = total_payments_sent))
+    mclapply(participants, participant_liq_prov)
 
   agg_prov <-
     rbindlist(agg_prov)
