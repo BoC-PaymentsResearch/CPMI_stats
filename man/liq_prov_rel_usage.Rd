@@ -4,16 +4,14 @@
 \alias{liq_prov_rel_usage}
 \title{Liquidity Provision Relative to Usage}
 \usage{
-liq_prov_rel_usage(participant, payments)
+liq_prov_rel_usage(payments)
 }
 \arguments{
-\item{participant}{character value, Identifying code of the payments system
-participant}
-
 \item{payments}{dataframe value, payments data}
 }
 \value{
-dataframe structure, liquidity provision of the given participant
+function, returns a closure that contains the aggregate level data
+        in its environment. The closure takes one argument: participant name.
 }
 \description{
 Liquidity Provision Relative to Usage
@@ -21,4 +19,14 @@ Liquidity Provision Relative to Usage
 \details{
 Assumes that the payments data file has the form:
 ID, date, time, value, from, to
+}
+\examples{
+
+
+participant_liq_prov <- liq_prov_rel_usage(example_data2)
+
+# participant_liq_prov can now be called with a participants name
+AAAAAA_liq_prov <- participant_liq_prov("AAAAAA")
+
+
 }
