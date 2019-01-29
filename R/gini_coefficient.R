@@ -1,15 +1,18 @@
 #' Gini Coefficient
 #'
 #' @param payments dataframe value, payments data
+#' @param liquidity_provided dataframe value, optional parameter of a dataframe
+#'                           containing the maximum net debit positions of all
+#'                           participants. If not provided then this function
+#'                           calculates these positions
 #' @return dataframe structure, daily gini coefficient of the system
 #'
 #' @details
 #'
 #' Assumes that the payments data file has the form:
-#' ID, date, time, value, from, to
+#' ID, date, time, value, from, to.
 #'
-gini_coefficient <- function(payments) {
-
+gini_coefficient <- function(payments, liquidity_provided) {
 
   # correct column name check
   if(!all(colnames(payments) %in% c("ID", "date", "time", "value", "from", "to"))) {
@@ -23,7 +26,6 @@ gini_coefficient <- function(payments) {
          hms, use the function as.hms() to convert it")
   }
 
-
   if(!"data.table" %in% class(payments)) {
     setDT(payments)
   }
@@ -34,25 +36,25 @@ gini_coefficient <- function(payments) {
 
   # Number of payments
 
-  m <- payments[, .(num_payments = .N), by = .(date, from)]
+  if(missing(liquidity_provided)) {
 
+    liquidity_provided <-
+      mclapply(participants, function(x)
+        max_liq_prov(x, payments, T))
 
-  # Average liquidity provided
-  liquidity_provided <-
-    mclapply(participants, function(x)
-      max_liq_prov(x, payments, T))
+    liquidity_provided <-
+      rbindlist(liquidity_provided)
 
-  liquidity_provided <-
-    rbindlist(liquidity_provided)
+  } else {
+    liquidity_provided <- copy(liquidity_provided)
+  }
 
   setnames(liquidity_provided, "participant", "from")
 
-  # Payments sent
   payments_sent <-
-    payments[, .(total_value = sum(value, na.rm = T) / 1.0e+09),
+    payments[, .(total_value = sum(value, na.rm = T),
+                 num_payments = .N),
              by = .(date, from)]
-
-  # Average Liquidity cost
 
   setkey(liquidity_provided, date, from)
   setkey(payments_sent, date, from)
@@ -61,12 +63,7 @@ gini_coefficient <- function(payments) {
 
   avg_liquidity_cost[, cost := max_net_pos / total_value]
 
-  #----------------------------------------------------------------------------
-
-  # System Level --------------------------------------------------------------
-
-  # Total number of payments made by all participants
-  M <- payments[, .(num_payments = .N), by = .(date)]
+  # SYSTEM LEVEL --------------------------------------------------------------
 
   # MU - Average liquidity cost of system (volume weighted average
   # of participants payments)
@@ -79,42 +76,36 @@ gini_coefficient <- function(payments) {
   # The Participant level data needs to be first aggregated to the daily level
   # so it can be merged with system level data
 
-  # Calculating the sums in the gini coefficient
-  two_sums <- function(df) {
+  two_sums <- function(liq_cost, num_pmts) {
 
-    df <- na.omit(df)
+    ts <- seq_along(liq_cost)
+    n <- length(liq_cost)
 
-    liq_sums <- sapply(df$from,
-                       function(x)
-                         sum(df$num_payments[which(df$from == x)] *
-                               df$num_payments[which(df$from != x)] *
-                               abs(df$cost[which(df$from == x)] - df$cost[which(df$from != x)])))
+    liq_sums <-
+      (sapply(ts[-n], function(x)
+        sum(
+          abs(liq_cost[seq(x + 1, n)] - liq_cost[x]) * num_pmts[seq(x + 1, n)] * num_pmts[x]
+        )))
 
     return(sum(liq_sums))
 
   }
 
-  setkey(avg_liquidity_cost, date, from)
-  setkey(m, date, from)
+  setorder(avg_liquidity_cost, date, cost)
 
-  agg_particips <- merge(avg_liquidity_cost, m, all.x = TRUE)
+  agg_particips <-
+    avg_liquidity_cost[, .(sums_particip = two_sums(cost, num_payments),
+                           total_payments = sum(.SD$num_payments)), by = .(date)]
 
-
-  agg_particips <- agg_particips[, .(sums_particip = two_sums(.SD)), by = .(date)]
-
-
-  setkey(M, date)
   setkey(mu, date)
   setkey(agg_particips, date)
 
-  gini_df <- merge(M, mu, all.x = TRUE)
+  gini_df <- merge(mu, agg_particips, all.x = TRUE)
 
-  gini_df <- merge(gini_df, agg_particips, all.x = TRUE)
+  gini_df[, gini := (sums_particip / (total_payments ^ 2 * sys_cost))]
 
-  gini_df[, gini := (1 / (2 * num_payments ^ 2 * sys_cost)) * sums_particip]
-
-  gini_df[, c("num_payments", "sys_cost", "sums_particip") := NULL]
+  gini_df[, c("total_payments", "sys_cost", "sums_particip") := NULL]
 
   return(gini_df)
 
-}
+  }

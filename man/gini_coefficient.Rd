@@ -4,10 +4,15 @@
 \alias{gini_coefficient}
 \title{Gini Coefficient}
 \usage{
-gini_coefficient(payments)
+gini_coefficient(payments, liquidity_provided)
 }
 \arguments{
 \item{payments}{dataframe value, payments data}
+
+\item{liquidity_provided}{dataframe value, optional parameter of a dataframe
+containing the maximum net debit positions of all
+participants. If not provided then this function
+calculates these positions}
 }
 \value{
 dataframe structure, daily gini coefficient of the system
@@ -17,5 +22,5 @@ Gini Coefficient
 }
 \details{
 Assumes that the payments data file has the form:
-ID, date, time, value, from, to
+ID, date, time, value, from, to.
 }
