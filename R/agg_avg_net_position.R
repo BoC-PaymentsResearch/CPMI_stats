@@ -40,7 +40,7 @@ agg_avg_net_position <- function(payments, debit, central_bank = NULL,
 
   # correct time formatting
   if(!"hms" %in% class(payments$time)) {
-    stop("The payments column isn't in the correct format. It needs to be of class
+    stop("The time column isn't in the correct format. It needs to be of class
          hms, use the function as.hms() to convert it")
   }
 
