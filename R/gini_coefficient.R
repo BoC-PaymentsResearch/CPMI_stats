@@ -61,6 +61,8 @@ gini_coefficient <- function(payments, liquidity_provided) {
 
   avg_liquidity_cost <- merge(liquidity_provided, payments_sent, all.x = TRUE)
 
+  avg_liquidity_cost <- avg_liquidity_cost[num_payments != 0]
+
   avg_liquidity_cost[, cost := max_net_pos / total_value]
 
   # SYSTEM LEVEL --------------------------------------------------------------
@@ -69,7 +71,7 @@ gini_coefficient <- function(payments, liquidity_provided) {
   # of participants payments)
 
   mu <-
-    avg_liquidity_cost[, .(sys_cost = weighted_mean(cost, total_value)), by = .(date)]
+    avg_liquidity_cost[, .(sys_cost = weighted_mean(cost, num_payments)), by = .(date)]
 
   #----------------------------------------------------------------------------
 
